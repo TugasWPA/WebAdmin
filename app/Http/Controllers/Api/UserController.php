@@ -7,28 +7,29 @@ use App\Http\Controllers\Controller;
 use App\User;
 use Illuminate\Support\Facades\Validator;
 
-class UserController extends Controller
-{
-    public function login(Request $requset)
-    {
-        // dd($request->all());die;
+class UserController extends Controller {
+    public function login(Request $requset) {
+        // dd($requset->all());die();
         $user = User::where('email', $requset->email)->first();
 
         if ($user) {
-            if (password_verify($requset->password, $user->password)) {
+            $user->update([
+                'fcm' => $requset->fcm
+            ]);
+
+            if (password_verify($requset->Password, $user->password)) {
                 return response()->json([
                     'success' => 1,
-                    'message' => 'Selamat Datang ' . $user->name,
+                    'message' => 'Selamat datang ' . $user->name,
                     'user' => $user
                 ]);
             }
-            return $this->error('Password Salah!');
+            return $this->error('Password Salah');
         }
-        return $this->error('Email Tidak Terdaftar!');
+        return $this->error('Email tidak terdaftar');
     }
 
-    public function register(Request $requset)
-    {
+    public function register(Request $requset) {
         //nama, email, password
         $validasi = Validator::make($requset->all(), [
             'name' => 'required',
@@ -42,24 +43,26 @@ class UserController extends Controller
         }
 
         $user = User::create(array_merge($requset->all(), [
-            'password' => bcrypt($requset->password)
+            'password' => bcrypt($requset->Password)
         ]));
 
         if ($user) {
             return response()->json([
                 'success' => 1,
-                'message' => 'Berhasil Register',
+                'message' => 'Selamat datang Register Berhasil',
                 'user' => $user
             ]);
         }
-        return $this->error('Register Gagal');
+
+        return $this->error('Registrasi gagal');
+
     }
-    //function untuk return error
-    public function error($pasan)
-    {
+
+    public function error($pasan) {
         return response()->json([
             'success' => 0,
             'message' => $pasan
         ]);
     }
+
 }
